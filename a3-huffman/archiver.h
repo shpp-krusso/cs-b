@@ -11,6 +11,11 @@ using namespace std;
 class Archiver
 {
 public:
+    Archiver();
+    void compress(string pathOfOrigin, string pathOfArchive);
+    void uncompress(string pathOfArchive, string pathOfUncompressedFile);
+
+private:
     struct Node {
         char value;
         int freq;
@@ -30,10 +35,6 @@ public:
             this->right = right;
         }
     };
-
-
-    Archiver();
-    void compress(string pathOfOrigin, string pathOfArchive);
     map<char, int>* buildFreqTable(string pathOfOrigin);
     Node *buildHuffmansTree(map <char, int>* freqTable);
     void buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, string &codeOneSymbol);
@@ -45,7 +46,6 @@ public:
     void getEncryptedTree(Node *root, string *encryptedTree);
     void deleteHuffmansTree(Node* root);
     void writeToFile(string pathOfUncompressedFile, string data);
-    void uncompress(string pathOfArchive, string pathOfUncompressedFile);
     Node* getTree(ifstream &inFile);
     string getData(Node* root, ifstream &inFile, string pathOfUncompressedFile);
     Node* getDecodedTree(char*& ptr);
