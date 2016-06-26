@@ -18,7 +18,7 @@ public:
 
 private:
     const double PI = 3.14159265359;
-    map <string, double> variables; // store names and values of variables
+    map <string, double> variables; // stores names and values of variables
     void getNextActions(string &expr, int currentPosiotion, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &tmp);
     void estimateOneAction(string &action, stack<double> &digits);
     void estimateNextActions(vector<string> &nextActions, stack<double> &digits);
