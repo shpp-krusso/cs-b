@@ -145,8 +145,7 @@ void Archiver :: writeToFile(string pathOfArchive, string* encryptedTree, string
     for (unsigned i = 0; i < encryptedTree->length(); i++) {
         if ((*encryptedTree)[i] == '1') {
             byte = byte | (1 << (7 - position));
-        }
-        else {
+        } else {
             byte = byte | (0 << (7 - position));
         }
         position++;
@@ -165,8 +164,7 @@ void Archiver :: writeToFile(string pathOfArchive, string* encryptedTree, string
     for (unsigned i = 0; i < encryptedData->size(); i++) {
         if ((*encryptedData)[i] == '1') {
             byte = byte | (1 << (7 - position));
-        }
-        else {
+        } else {
             byte = byte | (0 << (7 - position));
         }
         position++;
