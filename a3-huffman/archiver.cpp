@@ -1,12 +1,11 @@
 #include "archiver.h"
-using namespace std;
-Archiver::Archiver() {
 
-}
+Archiver::Archiver(){}
 
-map <char, int>* Archiver :: getSymbolsFreq(string filePath) {
+/* Returns map that keep frequency of every char in the file*/
+map<char, int>* Archiver :: buildFreqTable(string pathOfOrigin) {
     ifstream inFile;
-    inFile.open(filePath.c_str(), ios :: out | ios :: binary);
+    inFile.open(pathOfOrigin.c_str(), ios :: out | ios :: binary);
     map <char, int>* frequencyMap = new map <char, int>;
     char c;
     while (!inFile.eof()) {
@@ -14,16 +13,16 @@ map <char, int>* Archiver :: getSymbolsFreq(string filePath) {
         (*frequencyMap)[c]++;
     }
     inFile.close();
-    cout <<" --------frequencyMap---------------" << endl;
     map<char, int> :: iterator iter;
     for (iter = frequencyMap->begin();iter !=  frequencyMap->end(); iter++) {
-        cout << iter->first << " - " << iter->second << endl;
     }
-    cout << endl;
     return frequencyMap;
 }
 
-list<Node*>& Archiver :: orderedNodeInsert(Node* node, list<Node*> &sortedList) {
+/* @param Take a sorted list
+ * @param take a new element
+ * Returns a sorted list with new element. */
+list<Archiver :: Node*>& Archiver :: orderedNodeInsert(Node* node, list<Node*> &sortedList) {
     bool isInserted = false;
     if (sortedList.empty()) {
         sortedList.push_back(node);
@@ -45,130 +44,113 @@ list<Node*>& Archiver :: orderedNodeInsert(Node* node, list<Node*> &sortedList) 
     return sortedList;
 }
 
-list<Node*>* Archiver :: buildLeaves(map<char, int> &freqMap) {
+/* Return a list of nodes, every element contains one element from the map*/
+list<Archiver :: Node*>* Archiver :: buildLeaves(map<char, int> *freqMap) {
     list<Node*>* leaves = new list<Node*>;
     map<char, int> :: iterator iter;
-    for (iter = freqMap.begin(); iter != freqMap.end(); iter++) {
+    for (iter = freqMap->begin(); iter != freqMap->end(); iter++) {
         Node* leaf = new Node(iter->first, iter->second);
         orderedNodeInsert(leaf, *leaves);
     }
-    cout << "---------------LEAVES----------------------" << endl;
     list<Node*> :: iterator it;
     for (it = leaves->begin(); it != leaves->end(); it++) {
-        cout << (*it)->value << " " << (*it)->freq << endl;
     }
     return leaves;
 }
 
-Node* Archiver :: buildTree(list<Node*> * nodeList) {
+/* Returns a root of huffman tree. Leafs are stored according to its frequency */
+Archiver :: Node* Archiver::buildHuffmanTree(map<char, int> *freqTable) {
+    list <Node*>* leaves = buildLeaves(freqTable);
     list<Node*> :: iterator iter;
     Node* root;
-    while (nodeList->size() > 1) {
-        for (iter = nodeList->begin(); iter != nodeList->end(); iter++) {
+    while (leaves->size() > 1) {
+        for (iter = leaves->begin(); iter != leaves->end(); iter++) {
             Node *left = *iter;
             iter++;
             Node *right = *iter;
             root = new Node(left, right);
-            nodeList->pop_front();
-            nodeList->pop_front();
-            *nodeList = orderedNodeInsert(root, *nodeList);
+            leaves->pop_front();
+            leaves->pop_front();
+            *leaves = orderedNodeInsert(root, *leaves);
             break;
         }
     }
     return root;
 }
 
-void Archiver::printTree(Node* root, unsigned k) { // вывод дерева в консоль
-    if(root != 0){
-        printTree(root->left, k + 3);
-        for(unsigned i = 0; i < k; i++){
-            cout << " ";
-        }
-        if(root->value) cout << root->freq << " (" << root->value << ")" << endl;
-        else cout << root->freq << endl;
-        printTree(root->right, k + 3);
-    }
-}
-
-void Archiver :: buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, vector <char> &codeOneSymbol) {
-    if (root->left && root->right) {
-        codeOneSymbol.push_back(0);
+/*
+ * @param symbolsCodeTable - the table char-> its code in huffman tree
+ * @param root - root of huffman tree
+ * @param codeOfOneSymbol - code of leaf, that keep current data*/
+void Archiver :: buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, string &codeOneSymbol) {
+    if (root->left) {
+        codeOneSymbol += "0";
         buildSymbolsCodeTable(root->left, symbolsCodeTable, codeOneSymbol);
-        codeOneSymbol.push_back(1);
+    }
+    if (root->right) {
+        codeOneSymbol += "1";
         buildSymbolsCodeTable(root->right, symbolsCodeTable, codeOneSymbol);
-    } else {
-        string tmp(codeOneSymbol.begin(), codeOneSymbol.end());
-        (*symbolsCodeTable)[root->value] = tmp;
     }
-    codeOneSymbol.pop_back();
+    if (!root->left && !root->right) {
+        (*symbolsCodeTable)[root->value] = codeOneSymbol;
+    }
+    codeOneSymbol = codeOneSymbol.substr(0, codeOneSymbol.length() - 1);
 }
 
-void Archiver :: printCodeTable(map<char, string> * symbolsCodeTable) {
-    map<char, string> :: iterator iter;
-    cout << "--------------Table Code---------------" << endl;
-    for (iter = symbolsCodeTable->begin(); iter != symbolsCodeTable->end(); iter++) {
-        cout << (*iter).first << " " << (*iter).second << endl;
-    }
-}
-
-string Archiver :: getEncryptedData(string filePath, map<char, string> *symbolsCodeTable) {
-    string encryptedData = "";
-    ifstream inFile;
-    inFile.open(filePath.c_str(), ios :: out | ios :: binary);
-    char c;
-    while (!inFile.eof()) {
-        c = inFile.get();
-        encryptedData += (*symbolsCodeTable)[c];
-    }
-    inFile.close();
-    cout << "------------Encrypted DATA --------------------" << endl;
-    cout  << encryptedData << endl;
-    return encryptedData;
-}
-
-void Archiver :: getEncryptedTree(Node *root, string &encryptedTree) {
-    if (root->left || root->right) {
-        encryptedTree += "0";
+void Archiver :: getEncryptedTree(Node *root, string *encryptedTree) {
+    if (root->left) {
+        *encryptedTree += "0";
         getEncryptedTree(root->left, encryptedTree);
     }
     if (root->right) {
         getEncryptedTree(root->right, encryptedTree);
     }
     if (!root->left || !root->right) {
-        encryptedTree += "1";
+        *encryptedTree += "1";
         for (unsigned i = 0; i < 8; i++) {
             char ch = root->value;
             if (ch & 1 << (7  -  i)) {
-                encryptedTree += "1";
+                *encryptedTree += "1";
             }
             else {
-                encryptedTree += "0";
+                *encryptedTree += "0";
             }
         }
     }
 }
 
-void Archiver :: writeInFile(string &encryptedTree, string &encryptedData) {
-    string pathOutputFile = "/home/kocmuk/Qt-projects/a3-huffman/test.myzip";
-    ofstream fileOut(pathOutputFile.c_str(), ios::binary);
-    int sizeOfTree = 0;
-    int sizeOfData = 0;
-    fileOut.write(reinterpret_cast<char*>(&sizeOfTree), sizeof(int));
-    fileOut.write(reinterpret_cast<char*>(&sizeOfData), sizeof(int));
+/* Return string data on which every char is encoded according to huffman code*/
+string* Archiver :: getEncryptedData(string pathOfOrigin, map<char, string> *codeTable) {
+    string* encryptedData = new string;
+    *encryptedData = "";
+    ifstream inFile;
+    inFile.open(pathOfOrigin.c_str(), ios :: out | ios :: binary);
+    char c;
+    while (!inFile.eof()) {
+        c = inFile.get();
+        *encryptedData += (*codeTable)[c];
+    }
+    inFile.close();
+    return encryptedData;
+}
+
+void Archiver :: writeToFile(string pathOfArchive, string* encryptedTree, string* encryptedData) {
+    ofstream fileOut(pathOfArchive.c_str(), ios::binary);
+    int sizeOfTree = encryptedTree->length();
+    int sizeOfData = encryptedData->length();
+
+    fileOut << sizeOfTree;
     int position = 0;
     char byte = 0;
-    for (unsigned i = 0; i < encryptedTree.size(); i++) {
-        if (encryptedTree[i]) {
+    for (unsigned i = 0; i < encryptedTree->length(); i++) {
+        if ((*encryptedTree)[i] == '1') {
             byte = byte | (1 << (7 - position));
-            cout << "1";
         }
         else {
             byte = byte | (0 << (7 - position));
-            cout << "0";
         }
         position++;
         if (position == 8) {
-            cout << "!";
             position = 0;
             fileOut.put(byte);
             byte = 0;
@@ -177,9 +159,11 @@ void Archiver :: writeInFile(string &encryptedTree, string &encryptedData) {
     if (position) {
         fileOut.put(byte);
     }
+
+    fileOut << sizeOfData;
     position = byte = 0;
-    for (unsigned i = 0; i < encryptedData.size(); i++) {
-        if (encryptedData[i] == '1') {
+    for (unsigned i = 0; i < encryptedData->size(); i++) {
+        if ((*encryptedData)[i] == '1') {
             byte = byte | (1 << (7 - position));
         }
         else {
@@ -197,134 +181,140 @@ void Archiver :: writeInFile(string &encryptedTree, string &encryptedData) {
     }
     fileOut.close();
 }
-deque<char> Archiver :: addStringtoByteDeque(string s, deque<char> &deq) {
-    int position = 0;
-    char byte;
-    for (unsigned i = 0; i < s.size(); i++) {
-        if (s[i]) {
-            byte = byte |(1 << (7 - position));
-        } else {
-            byte = byte | (0 << (7 - position));
-        }
-        position++;
-        if (position == 8) {
-            position = 0;
-            deq.push_back(byte);
-        }
+
+void Archiver :: deleteHuffmanTree(Archiver :: Node* root) {
+    if (!root->left) {
+        deleteHuffmanTree(root->left);
     }
-    while (position) {
-        byte = byte | (0 << (7 - position));
-        position++;
-        if (position == 8) {
-            position = 0;
-            deq.push_back(byte);
-        }
+    if (!root->right) {
+        deleteHuffmanTree(root->right);
     }
-    return deq;
+    delete root;
 }
 
-//deque<char>* Archiver :: getFinalCode(string &encryptedTree, string &encryptedData) {
-//    deque<char>* finalCode = new deque<char>;
-//    bitset<32>
-//     treeSize = "" + encryptedTree.size();
-//    *finalCode = addStringtoByteDeque(treeSize, *finalCode);
-//    *finalCode = addStringtoByteDeque(encryptedTree, *finalCode);
-//    string dataSize = "" + encryptedData.size();
-//    *finalCode = addStringtoByteDeque(dataSize, *finalCode);
-//    *finalCode = addStringtoByteDeque(encryptedData, *finalCode);
-//    return finalCode;
-//}
+void Archiver::garbageCollector(map<char, int> *freqTable, Archiver::Node *root, map<char, string> *codeTable, string *encryptedData, string *encryptedTree) {
+    delete freqTable;
+    deleteHuffmanTree(root);
+    delete codeTable;
+    delete encryptedData;
+    delete encryptedTree;
+}
 
-//void Archiver :: writeInFile(string &encryptedTree, string &encryptedData) {
-//    deque<char> *finalCode = getFinalCode(encryptedTree, encryptedData);
-//    string pathOutputFile = "/home/kocmuk/Qt-projects/a3-huffman/test.myzip";
-//    ofstream outFile(pathOutputFile.c_str());
-//    while (finalCode->size()) {
-//        char c = finalCode->front();
-//        finalCode->pop_front();
-//        outFile.put(c);
-//    }
-//    outFile.close();
-//}
-
-void Archiver :: compress(string filePath ) {
-    map<char, int> *freqMap;
-    freqMap = getSymbolsFreq(filePath);
-    list<Node*> *nodeList = buildLeaves(*freqMap);
-    Node* root = buildTree(nodeList);
-    cout << "--------------------TREE#1---------------------------" <<  endl;
-    printTree(root, 0);
-    map<char, string >* symbolsCodeTable = new map<char, string >;
-    vector<char> codeOneSymbol;
-    buildSymbolsCodeTable(root, symbolsCodeTable, codeOneSymbol);
-    printCodeTable(symbolsCodeTable);
-    string encryptedData = getEncryptedData(filePath, symbolsCodeTable);
-    string encryptedTree = "";
+void Archiver::compress(string pathOfOrigin, string pathOfArchive) {
+    map<char, int>* freqTable = buildFreqTable(pathOfOrigin);
+    Node* root = buildHuffmanTree(freqTable);
+    map<char, string>* codeTable = new map<char, string>;
+    string codeOfSymbol = "";
+    buildSymbolsCodeTable(root, codeTable, codeOfSymbol);
+    string* encryptedTree = new string;
+    *encryptedTree = "";
     getEncryptedTree(root, encryptedTree);
-    cout << "-----------------------Encrypted TREE----------" << endl;
-    cout << encryptedTree << endl;
-//    writeInFile(encryptedTree, encryptedData);
+    string* encryptedData = new string;
+    encryptedData = getEncryptedData(pathOfOrigin, codeTable);
+    writeToFile(pathOfArchive, encryptedTree, encryptedData);
+    garbageCollector(freqTable, root, codeTable, encryptedData, encryptedTree);
 }
 
-deque<char>* Archiver :: readFile(string filePath) {
-    deque<char>* encodedFile = new deque<char>;
-    ifstream inFile(filePath.c_str());
-    char c;
-    while (!inFile.eof()) {
-        c = inFile.get();
-        encodedFile->push_back(c);
+char Archiver :: getCharFromByte(char*& ptr) {
+    char ch = 0;
+    for (int i = 0; i < 8; i++) {
+        if (*ptr - '0') {
+            ch = ch | 1 << (7 - i);
+        } else {
+            ch = ch | 0 << (7 - i);
+        }
+        ptr++;
     }
-    return encodedFile;
+    return ch;
 }
 
-Node* buildTreeFromEncodedTree(deque<bool> &encodedTree) {
-
-}
-
-Node* Archiver :: getTree(deque<char>* encodedFile) {
-    int treeSize = 0;
-    for (unsigned i = 0; i < sizeof(string); i++) {
-        char c = encodedFile->front();
-        int tmp = c - '0';
-        treeSize = treeSize*10 + tmp;
-        encodedFile->pop_front();
-    }
-    cout << "treeSize " << treeSize << endl;
-    deque<bool> encodedTree;
-    for (int i = 0; i < treeSize/8; i++) {
-        char byte = encodedFile->front();
-        encodedFile->pop_front();
-        for (unsigned j = 0; j < 8; j++) {
-            bool tmp = false;
-            if (byte & (1 <(7 - j))) {
-                tmp = true;
+/* Decodes every char */
+Archiver :: Node* Archiver :: getDecodedTree(char*& ptr) {
+    if ((*ptr) - '0') {
+        ptr++;
+        char c = 0;
+        for(int i = 0; i < 8; i++){
+            if((*ptr - '0')) {
+                c = c | 1 << (7 - i);
+                ptr++;
+            } else {
+                c = c | 0 << (7 - i);
+                ptr++;
             }
-            encodedTree.push_back(tmp);
+        }
+        ptr--;
+        return new Node(c);
+    } else {
+        ptr++;
+        Node* left = getDecodedTree(ptr);
+        ptr++;
+        Node* right = getDecodedTree(ptr);
+        return new Node(left, right);
+    }
+}
+
+/* Return root of huffman tree*/
+Archiver :: Node* Archiver :: getTree(ifstream &inFile) {
+    int sizeOfTree;
+    inFile >> sizeOfTree;
+    string tree = "";
+
+    while(sizeOfTree) {
+        char c;
+        inFile.get(c);
+        for (int i = 0; i < 8; i++) {
+            tree += c & (1 << (7 - i)) ? '1' : '0';
+            sizeOfTree--;
+            if(!sizeOfTree){
+                break;
+            }
         }
     }
-    if (treeSize % 8) {
-        char byte = encodedFile->front();
-        encodedFile->pop_front();
-        for (int j = 0; j < treeSize % 8; j++) {
-            bool tmp = false;
-            if (byte & (1 <(7 - j))) {
-                tmp = true;
+    char* ptr = &tree[0];
+    Node* root = getDecodedTree(ptr);
+    return root;
+}
+
+
+/* Return data from encoded file*/
+string Archiver :: getData(Node* root, ifstream &inFile, string pathOfUncompressedFile) {
+    ofstream onFile(pathOfUncompressedFile.c_str());
+    int sizeOfData;
+    inFile >> sizeOfData;
+    string encodedData = "";
+    int k = sizeOfData--;
+    while(k) {
+        char c;
+        inFile.get(c);
+        for (int i = 0; i < 8; i++) {
+            encodedData += c & (1 << (7 - i)) ? '1' : '0';
+            k--;
+            if(!k) {
+                break;
             }
-            encodedTree.push_back(tmp);
         }
     }
-    cout << "-------------encoded tree 2--------------" << endl;
-    for (int i = 0; i < encodedTree.size(); i++) {
-        cout << encodedTree[i] << " ";
+    Node* tempPtr = root;
+    string data = "";
+    for (int i = 0; i < sizeOfData; i++) {
+        if (encodedData[i] - '0') {
+            tempPtr = tempPtr->right;
+        } else {
+            tempPtr = tempPtr->left;
+        }
+        if (!tempPtr->left && !tempPtr->right) {
+            data += tempPtr->value;
+            onFile.put(tempPtr->value);
+            tempPtr = root;
+        }
     }
-    cout << endl;
-//    Node* root = buildTreeFromEncodedTree(encodedTree);
-//    return root;
 }
 
-void Archiver :: uncompess(string filePath) {
-    deque<char>* encodedFile;
-    encodedFile = readFile(filePath);
-    Node* root = getTree(encodedFile);
-
+/* Get i=uncomressed file from archive*/
+void Archiver :: uncompress(string pathOfArchive, string pathOfUncompressedFile) {
+    ifstream inFile;
+    inFile.open(pathOfArchive.c_str(), ios :: out | ios :: binary);
+    Node* root = getTree(inFile);
+    string data = getData(root, inFile, pathOfUncompressedFile);
 }
+
