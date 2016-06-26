@@ -36,15 +36,15 @@ private:
         }
     };
     map<char, int>* buildFreqTable(string pathOfOrigin);
-    Node *buildHuffmansTree(map <char, int>* freqTable);
+    Node *buildHuffmanTree(map <char, int>* freqTable);
     void buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, string &codeOneSymbol);
     string* getEncryptedData(string pathOfOrigin, map<char, string> *codeTable);
-    void writeToFile(string pathOfArchive, string* encryptedTree, string* encryptedData);
-    void garbageCollector(map <char, int>* freqTable, Node* root, map<char, string>* codeTable,string* encryptedData, string* encryptedTree);
+    void writeToFile(string pathOfArchive, string &encryptedTree, string* encryptedData);
+    void garbageCollector(map <char, int>* freqTable, Node* root, map<char, string>* codeTable,string* encryptedData);
     list<Node*>& orderedNodeInsert(Node* node, list<Node*> &sortedList);
     list<Node*>* buildLeaves(map<char, int> *freqMap);
-    void getEncryptedTree(Node *root, string *encryptedTree);
-    void deleteHuffmansTree(Node* root);
+    void getEncryptedTree(Node *root, string &encryptedTree);
+    void deleteHuffmanTree(Node* root);
     void writeToFile(string pathOfUncompressedFile, string data);
     Node* getTree(ifstream &inFile);
     string getData(Node* root, ifstream &inFile, string pathOfUncompressedFile);

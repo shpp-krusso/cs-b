@@ -97,23 +97,23 @@ void Archiver :: buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCod
     codeOneSymbol = codeOneSymbol.substr(0, codeOneSymbol.length() - 1);
 }
 
-void Archiver :: getEncryptedTree(Node *root, string *encryptedTree) {
+void Archiver :: getEncryptedTree(Node *root, string &encryptedTree) {
     if (root->left) {
-        *encryptedTree += "0";
+        encryptedTree += "0";
         getEncryptedTree(root->left, encryptedTree);
     }
     if (root->right) {
         getEncryptedTree(root->right, encryptedTree);
     }
     if (!root->left || !root->right) {
-        *encryptedTree += "1";
+        encryptedTree += "1";
         for (unsigned i = 0; i < 8; i++) {
             char ch = root->value;
             if (ch & 1 << (7  -  i)) {
-                *encryptedTree += "1";
+                encryptedTree += "1";
             }
             else {
-                *encryptedTree += "0";
+                encryptedTree += "0";
             }
         }
     }
@@ -134,16 +134,16 @@ string* Archiver :: getEncryptedData(string pathOfOrigin, map<char, string> *cod
     return encryptedData;
 }
 
-void Archiver :: writeToFile(string pathOfArchive, string* encryptedTree, string* encryptedData) {
+void Archiver :: writeToFile(string pathOfArchive, string &encryptedTree, string* encryptedData) {
     ofstream fileOut(pathOfArchive.c_str(), ios::binary);
-    int sizeOfTree = encryptedTree->length();
+    int sizeOfTree = encryptedTree.length();
     int sizeOfData = encryptedData->length();
 
     fileOut << sizeOfTree;
     int position = 0;
     char byte = 0;
-    for (unsigned i = 0; i < encryptedTree->length(); i++) {
-        if ((*encryptedTree)[i] == '1') {
+    for (unsigned i = 0; i < encryptedTree.length(); i++) {
+        if ((encryptedTree)[i] == '1') {
             byte = byte | (1 << (7 - position));
         }
         else {
@@ -192,12 +192,11 @@ void Archiver :: deleteHuffmanTree(Archiver :: Node* root) {
     delete root;
 }
 
-void Archiver::garbageCollector(map<char, int> *freqTable, Archiver::Node *root, map<char, string> *codeTable, string *encryptedData, string *encryptedTree) {
+void Archiver::garbageCollector(map<char, int> *freqTable, Archiver::Node *root, map<char, string> *codeTable, string *encryptedData) {
     delete freqTable;
     deleteHuffmanTree(root);
     delete codeTable;
     delete encryptedData;
-    delete encryptedTree;
 }
 
 void Archiver::compress(string pathOfOrigin, string pathOfArchive) {
@@ -206,13 +205,12 @@ void Archiver::compress(string pathOfOrigin, string pathOfArchive) {
     map<char, string>* codeTable = new map<char, string>;
     string codeOfSymbol = "";
     buildSymbolsCodeTable(root, codeTable, codeOfSymbol);
-    string* encryptedTree = new string;
-    *encryptedTree = "";
+    string encryptedTree = "";
     getEncryptedTree(root, encryptedTree);
     string* encryptedData = new string;
     encryptedData = getEncryptedData(pathOfOrigin, codeTable);
     writeToFile(pathOfArchive, encryptedTree, encryptedData);
-    garbageCollector(freqTable, root, codeTable, encryptedData, encryptedTree);
+    garbageCollector(freqTable, root, codeTable, encryptedData);
 }
 
 char Archiver :: getCharFromByte(char*& ptr) {
