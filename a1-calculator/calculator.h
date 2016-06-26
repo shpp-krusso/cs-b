@@ -21,7 +21,6 @@ private:
     map <string, double> variables; // store names and values of variables
     void getNextActions(string &expr, int currentPosiotion, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &tmp);
     void estimateOneAction(string &action, stack<double> &digits);
-    void parse(string expr);
     void estimateNextActions(vector<string> &nextActions, stack<double> &digits);
     void estimateNextActions(stack<string> &nextActions, stack<double> &digits);
     void estimateOneOperation(string &action, stack<double> &digits);
