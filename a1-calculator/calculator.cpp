@@ -5,8 +5,8 @@ Calculator::Calculator() {
 }
 
 
-/* @param string expr a math expression.
-* Returns an result of calculation current expression*/
+/* @param string exprc- a math expression.
+* Returns a result of calculation current expression*/
 double Calculator::calculate(string &expr) {
     stack<string> mathActions;
     stack<double> digits;
@@ -72,7 +72,7 @@ void Calculator::estimateOneAction(string &action, stack<double> &digits) {
 }
 
 /* @param - string s
- * Return true if parametr is a variable, that user had entered earler
+ * Return true if parameter is a variable, that user has entered earlier
 */
 bool Calculator::isVariable(string s) {
     return variables.find(s) != variables.end();

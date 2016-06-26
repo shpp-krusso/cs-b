@@ -12,9 +12,13 @@ using namespace std;
 class Calculator
 {
 public:
-    const double PI = 3.14159265359;
     Calculator();
     double calculate(string &expr);
+    void setVariable(string var, double value);
+
+private:
+    const double PI = 3.14159265359;
+    map <string, double> variables; // store names and values of variables
     void getNextActions(string &expr, int currentPosiotion, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &tmp);
     void estimateOneAction(string &action, stack<double> &digits);
     void parse(string expr);
@@ -30,10 +34,6 @@ public:
     double stringToDouble(string s);
     void addActionInOrder(string s, stack <string> &mathActions, vector<string> &nextActions);
     int getActionPriority(string action);
-    void setVariable(string var, double value);
-
-private:
-    map <string, double> variables; // store names and values of variables
 
 };
 
