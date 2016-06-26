@@ -27,7 +27,7 @@ double Calculator::calculate(string &expr) {
     return digits.top();
 }
 
-/* If operations of functions will have pressed out of the stack, they will have added to a vector nextActions*/
+/* If operations or functions will have pressed out of the stack, they will have added to a vector nextActions*/
 void Calculator::getNextActions(string &expr, int currentPosition, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &tmp) {
     if (isFunction(tmp)) {
         addActionInOrder(tmp, mathActions, nextActions);
