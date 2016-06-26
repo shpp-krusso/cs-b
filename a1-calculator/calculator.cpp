@@ -5,7 +5,7 @@ Calculator::Calculator() {
 }
 
 
-/* @param string exprc- a math expression.
+/* @param string expr a math expression.
 * Returns a result of calculation current expression*/
 double Calculator::calculate(string &expr) {
     stack<string> mathActions;
