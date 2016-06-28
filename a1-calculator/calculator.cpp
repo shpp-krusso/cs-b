@@ -1,7 +1,17 @@
 #include "calculator.h"
 
 Calculator::Calculator() {
-
+    opers = {'*', '/', '-', '+', '(', ')'};
+    functions = {"sin", "cos", "tg"};
+    actionPriority["("] = 4;
+    actionPriority[")"] = 0;
+    actionPriority["+"] = 1;
+    actionPriority["-"] = 1;
+    actionPriority["*"] = 2;
+    actionPriority["/"] = 2;
+    actionPriority["sin"] = 3;
+    actionPriority["cos"] = 3;
+    actionPriority["tg"] = 3;
 }
 
 
@@ -27,7 +37,7 @@ double Calculator::calculate(string &expr) {
     return digits.top();
 }
 
-/* If operations or functions will have pressed out of the stack, they will have added to a vector nextActions*/
+/* If operations of functions will have pressed out of the stack, they will have added to a vector nextActions*/
 void Calculator::getNextActions(string &expr, int currentPosition, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &tmp) {
     if (isFunction(tmp)) {
         addActionInOrder(tmp, mathActions, nextActions);
@@ -102,7 +112,6 @@ bool Calculator::isDigit(char c) {
 
 /* Return true if parameter is a function, that is define in calculator.*/
 bool Calculator::isFunction(string s) {
-    vector<string> functions = {"sin", "cos", "tg"};
     for (int i = 0; i < functions.size(); i++) {
         if (s == functions[i])
             return true;
@@ -112,9 +121,6 @@ bool Calculator::isFunction(string s) {
 
 /* Return true if paramater is an operator*/
 bool Calculator::isOper(char c) {
-    vector<char> opers;
-    opers = {'*', '/', '-', '+', '(', ')'};
-
     for (int i = 0; i < opers.size(); i++) {
         if (c == opers[i]) {
             return true;
@@ -158,7 +164,7 @@ void Calculator::addActionInOrder(string action, stack<string> &mathActions, vec
         mathActions.push(action);
     } else {
         if (!getActionPriority(action)) {
-            while (getActionPriority(mathActions.top()) != 100) {
+            while (mathActions.top()) != "(") {
                 string s = mathActions.top();
                 mathActions.pop();
                 nextActions.push_back(s);
@@ -166,9 +172,9 @@ void Calculator::addActionInOrder(string action, stack<string> &mathActions, vec
             mathActions.pop();
         } else {
             while (mathActions.size() > 0 && getActionPriority(action) <= getActionPriority(mathActions.top())) {
-                if (getActionPriority(mathActions.top()) == 100) {
-                        break;
-            }
+                if (mathActions.top() == "(") {
+                    break;
+                }
 
                 string s = mathActions.top();
                 mathActions.pop();
@@ -181,16 +187,6 @@ void Calculator::addActionInOrder(string action, stack<string> &mathActions, vec
 
 
 int Calculator::getActionPriority(string action) {
-    map <string, int> actionPriority;
-    actionPriority["("] = 100;
-    actionPriority[")"] = 0;
-    actionPriority["+"] = 1;
-    actionPriority["-"] = 1;
-    actionPriority["*"] = 2;
-    actionPriority["/"] = 2;
-    actionPriority["sin"] = 3;
-    actionPriority["cos"] = 3;
-    actionPriority["tg"] = 3;
     return actionPriority[action];
 
 }
