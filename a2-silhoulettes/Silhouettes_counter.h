@@ -17,6 +17,7 @@ public:
     Silhouettes_counter();
     int count(string filePath);
     void fillSilhoulette(QPoint &point, int** imageLight, int height, int width,  int canvasColor);
+    bool isPointInsideRectangle(QPoint point, int height, int width);
 };
 
 #endif // SIHOUETTES_COUNTER_H

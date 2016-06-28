@@ -7,12 +7,10 @@ Silhouettes_counter :: Silhouettes_counter() {
  * @param width - width of the array
  * @param height  - the height of the array
  * Return true if point is lying within the two-dimensional array */
-bool isArrayRange(QPoint point, int height, int width) {
+bool Silhouettes_counter :: isPointInsideRectangle(QPoint point, int height, int width) {
     int x = point.x();
     int y = point.y();
-    if (x >= 0 && x < width && y >= 0 && y < height)
-        return true;
-    return false;
+    return x >= 0 && x < width && y >= 0 && y < height;
 }
 
 /* @param point - current point of the image, it is or a silhouelette or a canvas
@@ -21,24 +19,25 @@ bool isArrayRange(QPoint point, int height, int width) {
  * @param imageLight - matrix of lightness
  * Does bypass of the silhoulette*/
 void Silhouettes_counter :: fillSilhoulette(QPoint &point, int** imageLight, int height, int width, int canvasColor) {
-    queue<QPoint>* q = new queue<QPoint>;
+    queue<QPoint> q;
     imageLight[point.y()][point.x()] = canvasColor;
-    q->push(point);
-    while(q->size()) {
-        QPoint tmp = q->front();
-        q->pop();
+    q.push(point);
+    while(q.size()) {
+        QPoint tmp = q.front();
+        q.pop();
         int x = tmp.x();
         int y = tmp.y();
-        for (int i = -1; i < 2; i++) {
-            for (int j = -1; j < 2; j++) {
-                if (isArrayRange(QPoint(x + j, y + i), height, width) && imageLight[y + i][x + j] != canvasColor) {
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (isPointInsideRectangle(QPoint(x + j, y + i), height, width) && imageLight[y + i][x + j] != canvasColor) {
                     imageLight[y + i][x + j]  = canvasColor;
-                    q->push(QPoint(x + j, y + i));
+                    q.push(QPoint(x + j, y + i));
                 }
             }
         }
     }
 }
+
 
 /* Return a count of the silhoulettes standing separately*/
 int Silhouettes_counter :: count(string filePath) {
@@ -90,41 +89,41 @@ int Silhouettes_counter :: count(string filePath) {
     }
 
 
-    int zeroCounter = 0;
-    int oneCounter = 0;
+    int firstColorCounter = 0;
+    int secondColorCounter = 0;
     for (int i = 0; i < width; i++) {
         if (imageLight[0][i] > 0) {
-            oneCounter++;
+            secondColorCounter++;
         }
         else {
-            zeroCounter++;
+            firstColorCounter++;
         }
         if (imageLight[height - 1][i] > 0) {
-            oneCounter++;
+            secondColorCounter++;
         }
         else {
-            zeroCounter++;
+            firstColorCounter++;
         }
     }
 
     for (int i = 0; i < height; i++) {
         if (imageLight[i][width - 1] > 0) {
-            oneCounter++;
+            secondColorCounter++;
         }
         else {
-            zeroCounter++;
+            firstColorCounter++;
         }
         if (imageLight[i][0] > 0) {
-            oneCounter++;
+            secondColorCounter++;
         }
         else {
-            zeroCounter++;
+            firstColorCounter++;
         }
 
     }
 
     int canvasColor = 0;
-    if (oneCounter >= zeroCounter) {
+    if (secondColorCounter >= firstColorCounter) {
         canvasColor = 1;
     }
 
@@ -141,6 +140,8 @@ int Silhouettes_counter :: count(string filePath) {
             }
         }
     }
+    delete image;
+    delete colorMap;
     return result;
 }
 
