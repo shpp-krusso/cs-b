@@ -40,14 +40,14 @@ private:
     void buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, string &codeOneSymbol);
     string getEncryptedData(string& pathOfOrigin, map<char, string>* codeTable);
     void writeToFile(string& pathOfArchive, string &encryptedTree, string& encryptedData);
-    void garbageCollector(map <char, int>* freqTable, Node* root, map<char, string>* codeTable,string* encryptedData);
+    void freeMemory(map <char, int>* freqTable, Node* root, map<char, string>* codeTable,string* encryptedData);
     list<Node*>* orderedNodeInsert(Node* node, list<Node*>* sortedList);
     list<Node*>* buildLeaves(map<char, int>* freqMap);
     void getEncryptedTree(Node *root, string& encryptedTree);
     void deleteHuffmanTree(Node* root);
     Node* getTree(ifstream& inFile);
     string getData(Node* root, ifstream& inFile, string &pathOfUncompressedFile);
-    Node* getDecodedTree(char* ptr);
+    Node* getDecodedTree(char* &ptr);
     char getCharFromByte(char* ptr);
 
 

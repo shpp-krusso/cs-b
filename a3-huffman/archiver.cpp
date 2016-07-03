@@ -13,9 +13,6 @@ map<char, int>* Archiver :: buildFreqTable(string &pathOfOrigin) {
         (*frequencyMap)[c]++;
     }
     inFile.close();
-    map<char, int> :: iterator iter;
-    for (iter = frequencyMap->begin(); iter !=  frequencyMap->end(); iter++) {
-    }
     return frequencyMap;
 }
 
@@ -74,6 +71,7 @@ Archiver :: Node* Archiver::buildHuffmanTree(map<char, int>* freqTable) {
             break;
         }
     }
+    delete leaves;
     return root;
 }
 
@@ -191,12 +189,12 @@ void Archiver :: deleteHuffmanTree(Archiver :: Node* root) {
     delete root;
 }
 
-//void Archiver::garbageCollector(map<char, int> *freqTable, Archiver::Node *root, map<char, string> *codeTable, string *encryptedData) {
-//    delete freqTable;
-//    deleteHuffmanTree(root);
-//    delete codeTable;
-//    delete encryptedData;
-//}
+void Archiver::freeMemory(map<char, int> *freqTable, Archiver::Node *root, map<char, string> *codeTable, string *encryptedData) {
+    delete freqTable;
+    deleteHuffmanTree(root);
+    delete codeTable;
+    delete encryptedData;
+}
 
 void Archiver::compress(string& pathOfOrigin, string& pathOfArchive) {
     map<char, int>* freqTable = buildFreqTable(pathOfOrigin);
@@ -225,7 +223,7 @@ char Archiver :: getCharFromByte(char* ptr) {
 }
 
 /* Decodes every char */
-Archiver :: Node* Archiver :: getDecodedTree(char* ptr) {
+Archiver :: Node* Archiver :: getDecodedTree(char* &ptr) {
     if ((*ptr) - '0') {
         ptr++;
         char c = 0;
@@ -304,6 +302,7 @@ string Archiver :: getData(Node* root, ifstream &inFile, string& pathOfUncompres
             tempPtr = root;
         }
     }
+    return data;
 }
 
 /* Get uncomressed file from archive*/
