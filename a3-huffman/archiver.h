@@ -12,10 +12,9 @@ class Archiver
 {
 public:
     Archiver();
-    void compress(string pathOfOrigin, string pathOfArchive);
-    void uncompress(string pathOfArchive, string pathOfUncompressedFile);
+    void compress(string& pathOfOrigin, string& pathOfArchive);
+    void uncompress(string& pathOfArchive, string& pathOfUncompressedFile);
 
-private:
     struct Node {
         char value;
         int freq;
@@ -35,21 +34,21 @@ private:
             this->right = right;
         }
     };
-    map<char, int>* buildFreqTable(string pathOfOrigin);
-    Node *buildHuffmanTree(map <char, int>* freqTable);
+private:
+    map<char, int>* buildFreqTable(string &pathOfOrigin);
+    Node* buildHuffmanTree(map <char, int>* freqTable);
     void buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, string &codeOneSymbol);
-    string* getEncryptedData(string pathOfOrigin, map<char, string> *codeTable);
-    void writeToFile(string pathOfArchive, string &encryptedTree, string* encryptedData);
+    string getEncryptedData(string& pathOfOrigin, map<char, string>* codeTable);
+    void writeToFile(string& pathOfArchive, string &encryptedTree, string& encryptedData);
     void garbageCollector(map <char, int>* freqTable, Node* root, map<char, string>* codeTable,string* encryptedData);
-    list<Node*>& orderedNodeInsert(Node* node, list<Node*> &sortedList);
-    list<Node*>* buildLeaves(map<char, int> *freqMap);
-    void getEncryptedTree(Node *root, string &encryptedTree);
+    list<Node*>* orderedNodeInsert(Node* node, list<Node*>* sortedList);
+    list<Node*>* buildLeaves(map<char, int>* freqMap);
+    void getEncryptedTree(Node *root, string& encryptedTree);
     void deleteHuffmanTree(Node* root);
-    void writeToFile(string pathOfUncompressedFile, string data);
-    Node* getTree(ifstream &inFile);
-    string getData(Node* root, ifstream &inFile, string pathOfUncompressedFile);
-    Node* getDecodedTree(char*& ptr);
-    char getCharFromByte(char*& ptr);
+    Node* getTree(ifstream& inFile);
+    string getData(Node* root, ifstream& inFile, string &pathOfUncompressedFile);
+    Node* getDecodedTree(char* ptr);
+    char getCharFromByte(char* ptr);
 
 
 };

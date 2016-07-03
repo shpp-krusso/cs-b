@@ -3,10 +3,10 @@
 Archiver::Archiver(){}
 
 /* Returns map that keep frequency of every char in the file*/
-map<char, int>* Archiver :: buildFreqTable(string pathOfOrigin) {
+map<char, int>* Archiver :: buildFreqTable(string &pathOfOrigin) {
     ifstream inFile;
     inFile.open(pathOfOrigin.c_str(), ios :: out | ios :: binary);
-    map <char, int>* frequencyMap = new map <char, int>;
+    map<char, int>* frequencyMap = new map<char, int>;
     char c;
     while (!inFile.eof()) {
         c = inFile.get();
@@ -14,7 +14,7 @@ map<char, int>* Archiver :: buildFreqTable(string pathOfOrigin) {
     }
     inFile.close();
     map<char, int> :: iterator iter;
-    for (iter = frequencyMap->begin();iter !=  frequencyMap->end(); iter++) {
+    for (iter = frequencyMap->begin(); iter !=  frequencyMap->end(); iter++) {
     }
     return frequencyMap;
 }
@@ -22,35 +22,34 @@ map<char, int>* Archiver :: buildFreqTable(string pathOfOrigin) {
 /* @param Take a sorted list
  * @param take a new element
  * Returns a sorted list with new element. */
-list<Archiver :: Node*>& Archiver :: orderedNodeInsert(Node* node, list<Node*> &sortedList) {
+list<Archiver :: Node*>* Archiver :: orderedNodeInsert(Node* node, list<Node*>* sortedList) {
     bool isInserted = false;
-    if (sortedList.empty()) {
-        sortedList.push_back(node);
+    if (sortedList->empty()) {
+        sortedList->push_back(node);
         isInserted = true;
-    }
-    else {
+    } else {
         list <Node*> :: iterator iter;
-        for (iter = sortedList.begin(); iter != sortedList.end(); iter++) {
+        for (iter = sortedList->begin(); iter != sortedList->end(); iter++) {
             if (node->freq < (*iter)->freq) {
-                sortedList.insert(iter, node);
+                sortedList->insert(iter, node);
                 isInserted = true;
                 break;
             }
         }
         if (!isInserted) {
-            sortedList.push_back(node);
+            sortedList->push_back(node);
         }
     }
     return sortedList;
 }
 
 /* Return a list of nodes, every element contains one element from the map*/
-list<Archiver :: Node*>* Archiver :: buildLeaves(map<char, int> *freqMap) {
+list<Archiver :: Node*>* Archiver :: buildLeaves(map<char, int>* freqMap) {
     list<Node*>* leaves = new list<Node*>;
     map<char, int> :: iterator iter;
     for (iter = freqMap->begin(); iter != freqMap->end(); iter++) {
         Node* leaf = new Node(iter->first, iter->second);
-        orderedNodeInsert(leaf, *leaves);
+        orderedNodeInsert(leaf, leaves);
     }
     list<Node*> :: iterator it;
     for (it = leaves->begin(); it != leaves->end(); it++) {
@@ -59,19 +58,19 @@ list<Archiver :: Node*>* Archiver :: buildLeaves(map<char, int> *freqMap) {
 }
 
 /* Returns a root of huffman tree. Leafs are stored according to its frequency */
-Archiver :: Node* Archiver::buildHuffmanTree(map<char, int> *freqTable) {
+Archiver :: Node* Archiver::buildHuffmanTree(map<char, int>* freqTable) {
     list <Node*>* leaves = buildLeaves(freqTable);
     list<Node*> :: iterator iter;
     Node* root;
     while (leaves->size() > 1) {
         for (iter = leaves->begin(); iter != leaves->end(); iter++) {
-            Node *left = *iter;
+            Node* left = *iter;
             iter++;
-            Node *right = *iter;
+            Node* right = *iter;
             root = new Node(left, right);
             leaves->pop_front();
             leaves->pop_front();
-            *leaves = orderedNodeInsert(root, *leaves);
+            leaves = orderedNodeInsert(root, leaves);
             break;
         }
     }
@@ -82,7 +81,7 @@ Archiver :: Node* Archiver::buildHuffmanTree(map<char, int> *freqTable) {
  * @param symbolsCodeTable - the table char-> its code in huffman tree
  * @param root - root of huffman tree
  * @param codeOfOneSymbol - code of leaf, that keep current data*/
-void Archiver :: buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, string &codeOneSymbol) {
+void Archiver :: buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, string& codeOneSymbol) {
     if (root->left) {
         codeOneSymbol += "0";
         buildSymbolsCodeTable(root->left, symbolsCodeTable, codeOneSymbol);
@@ -120,24 +119,24 @@ void Archiver :: getEncryptedTree(Node *root, string &encryptedTree) {
 }
 
 /* Return string data on which every char is encoded according to huffman code*/
-string* Archiver :: getEncryptedData(string pathOfOrigin, map<char, string> *codeTable) {
-    string* encryptedData = new string;
-    *encryptedData = "";
+string Archiver :: getEncryptedData(string& pathOfOrigin, map<char, string>* codeTable) {
+    string encryptedData;
+    encryptedData = "";
     ifstream inFile;
     inFile.open(pathOfOrigin.c_str(), ios :: out | ios :: binary);
     char c;
     while (!inFile.eof()) {
         c = inFile.get();
-        *encryptedData += (*codeTable)[c];
+        encryptedData += (*codeTable)[c];
     }
     inFile.close();
     return encryptedData;
 }
 
-void Archiver :: writeToFile(string pathOfArchive, string &encryptedTree, string* encryptedData) {
+void Archiver :: writeToFile(string& pathOfArchive, string& encryptedTree, string& encryptedData) {
     ofstream fileOut(pathOfArchive.c_str(), ios::binary);
     int sizeOfTree = encryptedTree.length();
-    int sizeOfData = encryptedData->length();
+    int sizeOfData = encryptedData.length();
 
     fileOut << sizeOfTree;
     int position = 0;
@@ -162,8 +161,8 @@ void Archiver :: writeToFile(string pathOfArchive, string &encryptedTree, string
 
     fileOut << sizeOfData;
     position = byte = 0;
-    for (unsigned i = 0; i < encryptedData->size(); i++) {
-        if ((*encryptedData)[i] == '1') {
+    for (unsigned i = 0; i < encryptedData.size(); i++) {
+        if (encryptedData[i] == '1') {
             byte = byte | (1 << (7 - position));
         }
         else {
@@ -192,28 +191,27 @@ void Archiver :: deleteHuffmanTree(Archiver :: Node* root) {
     delete root;
 }
 
-void Archiver::garbageCollector(map<char, int> *freqTable, Archiver::Node *root, map<char, string> *codeTable, string *encryptedData) {
-    delete freqTable;
-    deleteHuffmanTree(root);
-    delete codeTable;
-    delete encryptedData;
-}
+//void Archiver::garbageCollector(map<char, int> *freqTable, Archiver::Node *root, map<char, string> *codeTable, string *encryptedData) {
+//    delete freqTable;
+//    deleteHuffmanTree(root);
+//    delete codeTable;
+//    delete encryptedData;
+//}
 
-void Archiver::compress(string pathOfOrigin, string pathOfArchive) {
+void Archiver::compress(string& pathOfOrigin, string& pathOfArchive) {
     map<char, int>* freqTable = buildFreqTable(pathOfOrigin);
     Node* root = buildHuffmanTree(freqTable);
-    map<char, string>* codeTable = new map<char, string>;
+    map<char, string> codeTable;
     string codeOfSymbol = "";
-    buildSymbolsCodeTable(root, codeTable, codeOfSymbol);
+    buildSymbolsCodeTable(root, &codeTable, codeOfSymbol);
     string encryptedTree = "";
     getEncryptedTree(root, encryptedTree);
-    string* encryptedData = new string;
-    encryptedData = getEncryptedData(pathOfOrigin, codeTable);
+    string encryptedData = getEncryptedData(pathOfOrigin, &codeTable);
     writeToFile(pathOfArchive, encryptedTree, encryptedData);
-    garbageCollector(freqTable, root, codeTable, encryptedData);
+    deleteHuffmanTree(root);
 }
 
-char Archiver :: getCharFromByte(char*& ptr) {
+char Archiver :: getCharFromByte(char* ptr) {
     char ch = 0;
     for (int i = 0; i < 8; i++) {
         if (*ptr - '0') {
@@ -227,7 +225,7 @@ char Archiver :: getCharFromByte(char*& ptr) {
 }
 
 /* Decodes every char */
-Archiver :: Node* Archiver :: getDecodedTree(char*& ptr) {
+Archiver :: Node* Archiver :: getDecodedTree(char* ptr) {
     if ((*ptr) - '0') {
         ptr++;
         char c = 0;
@@ -275,7 +273,7 @@ Archiver :: Node* Archiver :: getTree(ifstream &inFile) {
 
 
 /* Return data from encoded file*/
-string Archiver :: getData(Node* root, ifstream &inFile, string pathOfUncompressedFile) {
+string Archiver :: getData(Node* root, ifstream &inFile, string& pathOfUncompressedFile) {
     ofstream onFile(pathOfUncompressedFile.c_str());
     int sizeOfData;
     inFile >> sizeOfData;
@@ -308,8 +306,8 @@ string Archiver :: getData(Node* root, ifstream &inFile, string pathOfUncompress
     }
 }
 
-/* Get i=uncomressed file from archive*/
-void Archiver :: uncompress(string pathOfArchive, string pathOfUncompressedFile) {
+/* Get uncomressed file from archive*/
+void Archiver :: uncompress(string& pathOfArchive, string& pathOfUncompressedFile) {
     ifstream inFile;
     inFile.open(pathOfArchive.c_str(), ios :: out | ios :: binary);
     Node* root = getTree(inFile);
