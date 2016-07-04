@@ -3,7 +3,7 @@
 Archiver::Archiver(){}
 
 /* Returns map that keep frequency of every char in the file*/
-map<char, int>* Archiver :: buildFreqTable(string &pathOfOrigin) {
+map<char, int>* Archiver :: buildFreqTable(string& pathOfOrigin) {
     ifstream inFile;
     inFile.open(pathOfOrigin.c_str(), ios :: out | ios :: binary);
     map<char, int>* frequencyMap = new map<char, int>;
@@ -16,61 +16,32 @@ map<char, int>* Archiver :: buildFreqTable(string &pathOfOrigin) {
     return frequencyMap;
 }
 
-/* @param Take a sorted list
- * @param take a new element
- * Returns a sorted list with new element. */
-list<Archiver :: Node*>* Archiver :: orderedNodeInsert(Node* node, list<Node*>* sortedList) {
-    bool isInserted = false;
-    if (sortedList->empty()) {
-        sortedList->push_back(node);
-        isInserted = true;
-    } else {
-        list <Node*> :: iterator iter;
-        for (iter = sortedList->begin(); iter != sortedList->end(); iter++) {
-            if (node->freq < (*iter)->freq) {
-                sortedList->insert(iter, node);
-                isInserted = true;
-                break;
-            }
-        }
-        if (!isInserted) {
-            sortedList->push_back(node);
-        }
-    }
-    return sortedList;
-}
 
 /* Return a list of nodes, every element contains one element from the map*/
-list<Archiver :: Node*>* Archiver :: buildLeaves(map<char, int>* freqMap) {
-    list<Node*>* leaves = new list<Node*>;
+MyPriorityQueue<Archiver :: Node*>* Archiver :: buildLeaves(map<char, int>* freqMap) {
+    MyPriorityQueue<Node*>* leaves = new MyPriorityQueue<Node*>;
     map<char, int> :: iterator iter;
     for (iter = freqMap->begin(); iter != freqMap->end(); iter++) {
         Node* leaf = new Node(iter->first, iter->second);
-        orderedNodeInsert(leaf, leaves);
+       leaves->push(leaf);
     }
-    list<Node*> :: iterator it;
-    for (it = leaves->begin(); it != leaves->end(); it++) {
-    }
+
     return leaves;
 }
 
 /* Returns a root of huffman tree. Leafs are stored according to its frequency */
 Archiver :: Node* Archiver::buildHuffmanTree(map<char, int>* freqTable) {
-    list <Node*>* leaves = buildLeaves(freqTable);
-    list<Node*> :: iterator iter;
+    MyPriorityQueue <Node*>* leaves = buildLeaves(freqTable);
     Node* root;
     while (leaves->size() > 1) {
-        for (iter = leaves->begin(); iter != leaves->end(); iter++) {
-            Node* left = *iter;
-            iter++;
-            Node* right = *iter;
-            root = new Node(left, right);
-            leaves->pop_front();
-            leaves->pop_front();
-            leaves = orderedNodeInsert(root, leaves);
-            break;
-        }
+        Node* leftChild = leaves->top();
+        leaves->pop();
+        Node* rightChild = leaves->top();
+        leaves->pop();
+        Node* parent = new Node(leftChild, rightChild);
+        leaves->push(parent);
     }
+    root = leaves->top();
     delete leaves;
     return root;
 }
@@ -94,7 +65,7 @@ void Archiver :: buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCod
     codeOneSymbol = codeOneSymbol.substr(0, codeOneSymbol.length() - 1);
 }
 
-void Archiver :: getEncryptedTree(Node *root, string &encryptedTree) {
+void Archiver :: getEncryptedTree(Node *root, string& encryptedTree) {
     if (root->left) {
         encryptedTree += "0";
         getEncryptedTree(root->left, encryptedTree);
@@ -189,11 +160,9 @@ void Archiver :: deleteHuffmanTree(Archiver :: Node* root) {
     delete root;
 }
 
-void Archiver::freeMemory(map<char, int> *freqTable, Archiver::Node *root, map<char, string> *codeTable, string *encryptedData) {
+void Archiver::freeMemory(map<char, int> *freqTable, Archiver::Node *root) {
     delete freqTable;
     deleteHuffmanTree(root);
-    delete codeTable;
-    delete encryptedData;
 }
 
 void Archiver::compress(string& pathOfOrigin, string& pathOfArchive) {
@@ -206,7 +175,7 @@ void Archiver::compress(string& pathOfOrigin, string& pathOfArchive) {
     getEncryptedTree(root, encryptedTree);
     string encryptedData = getEncryptedData(pathOfOrigin, &codeTable);
     writeToFile(pathOfArchive, encryptedTree, encryptedData);
-    deleteHuffmanTree(root);
+    freeMemory(freqTable, root);
 }
 
 char Archiver :: getCharFromByte(char* ptr) {
@@ -311,5 +280,6 @@ void Archiver :: uncompress(string& pathOfArchive, string& pathOfUncompressedFil
     inFile.open(pathOfArchive.c_str(), ios :: out | ios :: binary);
     Node* root = getTree(inFile);
     string data = getData(root, inFile, pathOfUncompressedFile);
+    deleteHuffmanTree(root);
 }
 

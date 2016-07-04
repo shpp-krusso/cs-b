@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <list>
+#include "mypriorityqueue.h"
 using namespace std;
 
 class Archiver
@@ -27,12 +28,36 @@ public:
             right = 0;
         }
 
+        Node() {
+            value = 0;
+            freq = 0;
+            left = 0;
+            right= 0;
+        }
+
         Node(Node *left, Node *right) {
-            freq = left->freq + right->freq;
+            this->freq = left->freq + right->freq;
             value = 0;
             this->left = left;
             this->right = right;
         }
+
+        bool operator<(const Node* node) {
+            return this->freq < node->freq;
+        }
+
+        bool operator<=(const Node* node) {
+            return this->freq <= node->freq;
+        }
+
+        bool operator>(const Node* node) {
+            return this->freq > node->freq;
+        }
+
+        bool operator>=(const Node* node) {
+            return this->freq >= node->freq;
+        }
+
     };
 private:
     map<char, int>* buildFreqTable(string &pathOfOrigin);
@@ -40,9 +65,9 @@ private:
     void buildSymbolsCodeTable(Node* root, map<char, string>* symbolsCodeTable, string &codeOneSymbol);
     string getEncryptedData(string& pathOfOrigin, map<char, string>* codeTable);
     void writeToFile(string& pathOfArchive, string &encryptedTree, string& encryptedData);
-    void freeMemory(map <char, int>* freqTable, Node* root, map<char, string>* codeTable,string* encryptedData);
+    void freeMemory(map <char, int>* freqTable, Node* root);
     list<Node*>* orderedNodeInsert(Node* node, list<Node*>* sortedList);
-    list<Node*>* buildLeaves(map<char, int>* freqMap);
+    MyPriorityQueue<Node*>* buildLeaves(map<char, int>* freqMap);
     void getEncryptedTree(Node *root, string& encryptedTree);
     void deleteHuffmanTree(Node* root);
     Node* getTree(ifstream& inFile);
