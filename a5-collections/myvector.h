@@ -1,131 +1,156 @@
-#ifndef MY_VECTOR_H
-#define MY_VECTOR_H
-#include <iostream>
-#include <string>
+#ifndef MYVECTOR_H
+#define MYVECTOR_H
 
+#include <iostream>
 using namespace std;
-template<typename T>
+
+template <class T>
 class MyVector {
 private:
     T* array;
-    void allocNewMemory();
+    const double defaultCoefMemoryResize  = 2;
+    static const int defaultStartVectorSize = 2;
+    const double fillLimitCoef = 0.75;
+    const double unfillLimitCoef = 1 - fillLimitCoef;
+    int maxSize, filled;
+    void resize(double resizeCoef);
+
 public:
-    void pop_back();
-    int capacity, filled;
-    MyVector();
-    MyVector(int capacity);
-    MyVector(const MyVector&);
+    MyVector(int s = defaultStartVectorSize);
+    MyVector(const MyVector<T> &vec);
     ~MyVector();
-    void push_back(T new_element);
+    void push_back(const T &newElem);
+    T &back();
+    T &front();
     int size();
-    T operator[](int position);
-    MyVector& operator = (const MyVector&);
-    T at(int position);
+    int capacity();
+    void pop_back();
+    bool empty();
+    void shrink_to_fit();
+    MyVector<T>& operator=(const MyVector<T> &vec);
+    T& operator[](const int index);
 };
 
-/* The method reserves a free space to make sure the vector will have never overflowed. */
-template<typename T>
-void MyVector<T> :: allocNewMemory() {
-    capacity *= 2;
-    T* newArray = new  T[capacity];
-    for (int i = 0; i < filled; i++) {
-        newArray[i] = array[i];
-    }
-    delete[] array;
-    array = newArray;
-}
 
-/* Returns the number of elements in the vector*/
-template<typename T>
-int MyVector<T> :: size() {
-    return filled;
-}
-
-/* Delete the last filled element in the vector*/
-template<typename T>
-void MyVector<T> :: pop_back() {
-    if (filled != 0)
-        filled--;
-}
-
-/* Constructor creates a new vector.*/
-template<typename T>
-MyVector<T> :: MyVector() {
-    array = 0;
-    capacity  = filled = 0;
-
-}
-
-/* Constructor creates a new vector with desired capacity.
- * @param  int _capasity - the capscity of the vector */
-template<typename T>
-MyVector<T> :: MyVector(int _capacity) {
-    array = new T[_capacity];
-    capacity = _capacity;
-    filled = _capacity*2;
-}
-
-template<typename T>
-T MyVector<T> :: operator[](int position) {
-    if (position >= 0 && position <= filled) {
-        return array[position];
-    }
-}
-
-
-template<typename T>
-MyVector<T> :: MyVector(const MyVector &_vector) {
-    capacity = _vector.capacity;
-    array = new T[capacity];
+template <typename T>
+MyVector<T>::MyVector(int s) {
+    maxSize = (s > 1) ? s : defaultStartVectorSize;
     filled = 0;
-            for (int i = 0; i < capacity; i++) {
-        array[i] = _vector.array[i];
-        filled++;
+    array = new T[maxSize];
+}
+
+template <typename T>
+MyVector<T>::MyVector(const MyVector<T> &vec) {
+    filled = vec.filled;
+    maxSize = vec.maxSize;
+    array = new T[maxSize];
+    for (int i = 0; i < filled; i++) {
+        array[i] = vec.array[i];
     }
 }
 
-//destructor
-template<typename T>
-MyVector<T> :: ~MyVector() {
+template <typename T>
+MyVector<T>::~MyVector() {
     delete[] array;
+    filled = maxSize = 0;
 }
 
-/* Adds a new element on the position after the last filled element.*/
-template<typename T>
-void MyVector<T> :: push_back(T new_element) {
-    if (array == 0) {
-        array = new T[2];
-        capacity = 2;
+template <typename T>
+void MyVector<T>::resize(double resizeCoef) {
+    maxSize = (int) maxSize * resizeCoef;
+    T* tmp = new T[maxSize];
+    for (int i = 0; i < filled; i++) {
+        tmp[i] = array[i];
     }
-    else if (filled == capacity) {
-        allocNewMemory();
+    delete[] array;
+    array = tmp;
+}
+
+template <typename T>
+void MyVector<T>::push_back(const T &newElem) {
+    if (filled >= (int)(maxSize * fillLimitCoef)) {
+        resize(defaultCoefMemoryResize);
     }
-    array[filled] = new_element;
+    array[filled] = newElem;
     filled++;
 }
 
-template<typename T>
-MyVector<T>& MyVector<T> :: operator = (const MyVector<T> &source) {
-    if (this != &source) {
+template <typename T>
+T& MyVector<T>::back() {
+    if (filled) {
+        return array[filled -1];
+    } else {
+        return *array;
+    }
+}
+
+template <typename T>
+T& MyVector<T>::front() {
+    return *array;
+}
+
+template <typename T>
+int MyVector<T>::size() {
+    return filled;
+}
+
+template <typename T>
+int MyVector<T>::capacity() {
+    return maxSize;
+}
+
+template <typename T>
+void MyVector<T>::pop_back() {
+    if (!empty()) {
+        filled--;
+    }
+    if (filled < (int)(maxSize * unfillLimitCoef)) {
+        resize(1 / defaultCoefMemoryResize);
+    }
+}
+
+template <typename T>
+bool MyVector<T>::empty() {
+    return !filled;
+}
+
+template <typename T>
+void MyVector<T>::shrink_to_fit() {
+    T* tmp = new T[filled];
+    for (int i = 0; i < filled; i++) {
+        tmp[i] = array[i];
+    }
+    delete[] array;
+    array = tmp;
+    maxSize = filled;
+}
+
+template <typename T>
+MyVector<T> &MyVector<T>::operator=(const MyVector<T> &vec) {
+    if (array != vec.array) {
         delete[] array;
-        filled = 0;
-        this->capacity = source.capacity;
-        array = new T[capacity];
-        for (int i = 0; i < source.filled; i++) {
-            array[i] = source.array[i];
-            filled++;
+        maxSize = vec.maxSize;
+        array = new T[maxSize];
+        filled = vec.filled;
+        for (int i = 0; i < filled; i++) {
+            array[i] = vec.array[i];
         }
     }
     return *this;
 }
 
-/* Retutn an element on the current position
- * @param - the current position*/
-template<typename T>
-T MyVector<T> :: at(int position) {
-    if (position >= 0 && position <= this->filled)
-        return array[position];
+template <typename T>
+T &MyVector<T>::operator[](const int index) {
+    if (index >= 0 && index < filled) {
+        return array[index];
+    } else {
+        return *array;
+    }
 }
 
 
-#endif // MY_VECTOR_H
+
+
+
+#endif // MYVECTOR_H
+
