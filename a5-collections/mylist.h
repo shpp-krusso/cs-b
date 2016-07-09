@@ -152,8 +152,10 @@ void MyList<T>::pop_back()
 {
     if (countOfElem)
     {
+        Node* tmp = last;
         last = last->prev;
         (last == NULL) ? first = NULL : last->next = NULL;
+        delete tmp;
         countOfElem--;
     }
     else
@@ -168,8 +170,10 @@ void MyList<T>::pop_front()
 {
     if (countOfElem)
     {
+        Node* tmp = first;
         first = first->next;
         first->prev = NULL;
+        delete tmp;
         countOfElem--;
     }
     else
