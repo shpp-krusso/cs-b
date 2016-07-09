@@ -42,7 +42,6 @@ public:
     void push_front(const T &newEelement);
     void pop_front();
     void pop_back();
-    void insert(MyIterator position, T newElement);
     int size();
     bool isEmpty();
     void printErrorMessageListIsEmptyAndExitProgram(string nameOfFunc);
