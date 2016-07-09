@@ -5,7 +5,8 @@ using namespace std;
 
 
 template<typename T>
-class MyPriorityQueue {
+class MyPriorityQueue
+{
 public:
     MyPriorityQueue();
     bool empty();
@@ -27,7 +28,8 @@ private:
  * In fact thr the top element is element on position [1].
  */
 template<typename T>
-MyPriorityQueue<T> :: MyPriorityQueue() {
+MyPriorityQueue<T> :: MyPriorityQueue()
+{
     countOfElem = 0;
     T t;
     vec.push_back(t);
@@ -37,15 +39,17 @@ MyPriorityQueue<T> :: MyPriorityQueue() {
  * Return true if queue is empty.
  */
 template<typename T>
-bool MyPriorityQueue<T> :: empty() {
-    return countOfElem - 1 != 0;
+bool MyPriorityQueue<T> :: empty()
+{
+    return !(countOfElem - 1);
 }
 
 /*
  * Return a count of elements in the queue. The 0'th position is ignored.
  */
 template<typename T>
-int MyPriorityQueue<T> :: size() {
+int MyPriorityQueue<T> :: size()
+{
     return countOfElem;
 }
 
@@ -55,18 +59,23 @@ int MyPriorityQueue<T> :: size() {
  * Replays element on position pos1 and element on position pos2
  */
 template<typename T>
-void MyPriorityQueue<T> :: swap(int pos1, int pos2) {
-    T tmp;
-    tmp = vec[pos1];
-    vec[pos1] = vec[pos2];
-    vec[pos2] = tmp;
+void MyPriorityQueue<T>::swap(int pos1, int pos2)
+{
+    if (countOfElem)
+    {
+        T tmp;
+        tmp = vec[pos1];
+        vec[pos1] = vec[pos2];
+        vec[pos2] = tmp;
+    }
 }
 
 /*
  * Function adds a new element into queue according to it's value.
  */
 template<typename T>
-void MyPriorityQueue<T> :: push(T newElem) {
+void MyPriorityQueue<T> :: push(T newElem)
+{
     vec.push_back(newElem);
     countOfElem++;
     lastElemToRightPosition();
@@ -77,10 +86,12 @@ void MyPriorityQueue<T> :: push(T newElem) {
  * Function sets an element that is on current position
  */
 template<typename T>
-void MyPriorityQueue<T> :: lastElemToRightPosition() {
+void MyPriorityQueue<T> :: lastElemToRightPosition()
+{
     int pos = countOfElem;
     int parrentPos = pos / 2;
-    while (vec[parrentPos] > vec[pos]) {
+    while (vec[parrentPos] > vec[pos])
+    {
         swap(parrentPos, pos);
         pos = parrentPos;
         parrentPos = pos / 2;
@@ -89,7 +100,8 @@ void MyPriorityQueue<T> :: lastElemToRightPosition() {
 
 /* Delete the last element in a list*/
 template<typename T>
-void MyPriorityQueue<T> :: pop() {
+void MyPriorityQueue<T> :: pop()
+{
     swap(1, countOfElem);
     vec.pop_back();
     countOfElem--;
@@ -99,11 +111,14 @@ void MyPriorityQueue<T> :: pop() {
 /* If an element has more than one child, it return position of the smaller ones. If an element has one  child, it return its position.
  * If an element has no children it return -1*/
 template<typename T>
-int MyPriorityQueue<T> :: getLessChildPosition(const int pos) {
-    if (pos * 2 > countOfElem) {
+int MyPriorityQueue<T> :: getLessChildPosition(const int pos)
+{
+    if (pos * 2 > countOfElem)
+    {
         return 0;
     }
-    if (vec[pos * 2] < vec[pos * 2 + 1] || pos * 2 + 1 > countOfElem) {
+    if (vec[pos * 2] < vec[pos * 2 + 1] || pos * 2 + 1 > countOfElem)
+    {
         return pos * 2;
     }
     return (pos * 2) + 1;
@@ -111,14 +126,18 @@ int MyPriorityQueue<T> :: getLessChildPosition(const int pos) {
 
 /* Move an element on its rigth posion according to its value.*/
 template<typename T>
-void MyPriorityQueue<T> :: topElemToRightPosition() {
+void MyPriorityQueue<T> :: topElemToRightPosition()
+{
     int pos = 1;
     int lessChildPos = getLessChildPosition(pos);
-    if (!lessChildPos) {
+    if (!lessChildPos)
+    {
         return;
     }
-    while (vec[pos] > vec[lessChildPos]) {
-        if(lessChildPos) {
+    while (vec[pos] > vec[lessChildPos])
+    {
+        if(lessChildPos)
+        {
             break;
         }
         swap(pos, lessChildPos);
@@ -130,7 +149,8 @@ void MyPriorityQueue<T> :: topElemToRightPosition() {
 
 /* Return the less value in the queue*/
 template<typename T>
-T MyPriorityQueue<T> :: top() {
+T MyPriorityQueue<T> :: top()
+{
     return vec[1];
 }
 

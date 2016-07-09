@@ -5,7 +5,8 @@
 using namespace std;
 
 template <class T>
-class MyVector {
+class MyVector
+{
 private:
     T* array;
     const double defaultCoefMemoryResize  = 2;
@@ -33,33 +34,39 @@ public:
 
 
 template <typename T>
-MyVector<T>::MyVector(int s) {
+MyVector<T>::MyVector(int s)
+{
     maxSize = (s > 1) ? s : defaultStartVectorSize;
     filled = 0;
     array = new T[maxSize];
 }
 
 template <typename T>
-MyVector<T>::MyVector(const MyVector<T> &vec) {
+MyVector<T>::MyVector(const MyVector<T> &vec)
+{
     filled = vec.filled;
     maxSize = vec.maxSize;
     array = new T[maxSize];
-    for (int i = 0; i < filled; i++) {
+    for (int i = 0; i < filled; i++)
+    {
         array[i] = vec.array[i];
     }
 }
 
 template <typename T>
-MyVector<T>::~MyVector() {
+MyVector<T>::~MyVector()
+{
     delete[] array;
     filled = maxSize = 0;
 }
 
 template <typename T>
-void MyVector<T>::resize(double resizeCoef) {
+void MyVector<T>::resize(double resizeCoef)
+{
     maxSize = (int) maxSize * resizeCoef;
     T* tmp = new T[maxSize];
-    for (int i = 0; i < filled; i++) {
+    for (int i = 0; i < filled; i++)
+    {
         tmp[i] = array[i];
     }
     delete[] array;
@@ -67,8 +74,10 @@ void MyVector<T>::resize(double resizeCoef) {
 }
 
 template <typename T>
-void MyVector<T>::push_back(const T &newElem) {
-    if (filled >= (int)(maxSize * fillLimitCoef)) {
+void MyVector<T>::push_back(const T &newElem)
+{
+    if (filled >= (int)(maxSize * fillLimitCoef))
+    {
         resize(defaultCoefMemoryResize);
     }
     array[filled] = newElem;
@@ -76,18 +85,24 @@ void MyVector<T>::push_back(const T &newElem) {
 }
 
 template <typename T>
-T& MyVector<T>::back() {
-    if (filled) {
+T& MyVector<T>::back()
+{
+    if (filled)
+    {
         return array[filled -1];
-    } else {
+    }
+    else
+    {
         cerr << "Error! The back element is undefined! [The vector is empty!]" << endl;
         exit(1);
     }
 }
 
 template <typename T>
-T& MyVector<T>::front() {
-    if (!filled) {
+T& MyVector<T>::front()
+{
+    if (!filled)
+    {
         cerr << "Error! The front element is undefined! [The vector is empty!]" << endl;
         exit(1);
     }
@@ -95,34 +110,42 @@ T& MyVector<T>::front() {
 }
 
 template <typename T>
-int MyVector<T>::size() {
+int MyVector<T>::size()
+{
     return filled;
 }
 
 template <typename T>
-int MyVector<T>::capacity() {
+int MyVector<T>::capacity()
+{
     return maxSize;
 }
 
 template <typename T>
-void MyVector<T>::pop_back() {
-    if (!empty()) {
+void MyVector<T>::pop_back()
+{
+    if (!empty())
+    {
         filled--;
     }
-    if (filled < (int)(maxSize * unfillLimitCoef)) {
+    if (filled < (int)(maxSize * unfillLimitCoef))
+    {
         resize(1 / defaultCoefMemoryResize);
     }
 }
 
 template <typename T>
-bool MyVector<T>::empty() {
+bool MyVector<T>::empty()
+{
     return !filled;
 }
 
 template <typename T>
-void MyVector<T>::shrink_to_fit() {
+void MyVector<T>::shrink_to_fit()
+{
     T* tmp = new T[filled];
-    for (int i = 0; i < filled; i++) {
+    for (int i = 0; i < filled; i++)
+    {
         tmp[i] = array[i];
     }
     delete[] array;
@@ -131,13 +154,16 @@ void MyVector<T>::shrink_to_fit() {
 }
 
 template <typename T>
-MyVector<T> &MyVector<T>::operator=(const MyVector<T> &vec) {
-    if (array != vec.array) {
+MyVector<T> &MyVector<T>::operator=(const MyVector<T> &vec)
+{
+    if (array != vec.array)
+    {
         delete[] array;
         maxSize = vec.maxSize;
         array = new T[maxSize];
         filled = vec.filled;
-        for (int i = 0; i < filled; i++) {
+        for (int i = 0; i < filled; i++)
+        {
             array[i] = vec.array[i];
         }
     }
@@ -145,12 +171,16 @@ MyVector<T> &MyVector<T>::operator=(const MyVector<T> &vec) {
 }
 
 template <typename T>
-T &MyVector<T>::operator[](const int index) {
-    if (index >= 0 && index < filled) {
+T &MyVector<T>::operator[](const int index)
+{
+    if (index >= 0 && index < filled)
+    {
         return array[index];
-    } else {
-       cerr << "Error! Element on the required index ["<< index << "] is undefined! [out of range]" << endl;
-       exit(1);
+    }
+    else
+    {
+        cerr << "Error! Element on the required index ["<< index << "] is undefined! [out of range]" << endl;
+        exit(1);
     }
 }
 
