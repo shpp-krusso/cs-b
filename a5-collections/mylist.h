@@ -15,27 +15,16 @@ public:
         Node* prev;
     };
 
-    struct MyIterator {
-        MyList :: Node** ptr;
-        MyIterator() {
-            ptr = 0;
-        }
-
-        void operator++() {
-            ptr = (*ptr)->next;
-        }
-
-        void operator--() {
-            ptr = (*ptr)->prev;
-        }
-
-        Node** operator=(Node** elem) {
-            return  ptr = elem;
-        }
-
-        bool operator!=(Node** elem) {
-            return *ptr != *elem;
-        }
+    class MyIterator {
+    public:
+        MyList<T>::Node* ptr;
+        MyIterator();
+        MyIterator (Node* node);
+        MyIterator operator++();
+        MyIterator operator--();
+        bool operator!=(const MyIterator &iter);
+        bool operator==(const MyIterator &iter);
+        T &operator*();
     };
 
     Node* first; // pointer to the first element in a list
@@ -53,10 +42,13 @@ public:
     void insert(MyIterator position, T newElement);
     int size();
     bool isEmpty();
-    Node** end();
-    Node** begin();
+    void printEmptyErrorMessageAndExitProgram(string nameOfFunc);
+    MyIterator end();
+    MyIterator begin();
 private:
     int countOfElem; // Number of filled elements in a list. When a list is empty, it's  value equals 0;
+
+
 };
 
 template<typename T>
@@ -136,74 +128,109 @@ void MyList<T> :: push_front(const T &newElement) {
 /* Delete the last element of a list. */
 template<typename T>
 void MyList<T> :: pop_back() {
-    if (countOfElem > 1) {
-        Node* tmp = last->prev->prev;
-        last->prev = tmp;
-        tmp->next = last;
+    if (countOfElem) {
+        last = last->prev;
+        (last == NULL) ? first = NULL : last->next = NULL;
         countOfElem--;
-    } else if (countOfElem == 1) {
-        last->prev = 0;
-        first = last;
-        countOfElem--;
+    } else {
+        printEmptyErrorMessageAndExitProgram("pop_back()");
     }
 }
 
 /* Delete the last element of a list. */
 template<typename T>
-void MyList<T> :: pop_front() {
-    if (countOfElem > 1) {
+void MyList<T>::pop_front() {
+    if (countOfElem) {
         first = first->next;
-        first->prev = 0;
+        first->prev = NULL;
         countOfElem--;
-    } else if (first != last) {
-        last->prev = 0;
-        first = last;
+    } else {
+        printEmptyErrorMessageAndExitProgram("pop_front()");
     }
+}
+
+template<typename T>
+bool MyList<T>::MyIterator::operator==(const MyIterator &iter) {
+    return ptr == iter.ptr;
+}
+
+template<typename T>
+bool MyList<T>::MyIterator::operator!=(const MyIterator &iter) {
+    return ptr != iter.ptr;
 }
 
 /* Return true, if a list is empty. */
 template<typename T>
-bool MyList<T> :: isEmpty() {
+bool MyList<T>::isEmpty() {
     return !countOfElem;
 }
 
 /* Return a data of a last element in a list */
 template<typename T>
-T &MyList<T> :: back() {
-    Node* tmp = last->prev;
-    if (tmp)
-        return tmp->data;
+T &MyList<T>::back() {
+    if (!countOfElem) {
+        printEmptyErrorMessageAndExitProgram("back()");
+    } else {
+        return last->data;
+    }
 }
 
 /* Return a data of a first element in a list */
 template<typename T>
-T &MyList<T> :: front() {
-    if (countOfElem)
+T &MyList<T>::front() {
+    if (!countOfElem) {
+        printEmptyErrorMessageAndExitProgram("front()");
+    } else {
         return first->data;
+    }
+}
+
+template<typename T>
+void MyList<T>::printEmptyErrorMessageAndExitProgram(string nameOfFunc) {
+    cerr << "Error! The list is empty! [" << nameOfFunc << "]" << endl;
+    exit(1);
 }
 
 /* Return an adress of a memory section, that is the next after the last element in a list.
  * In other words, it returns an adress of an end of a list*/
 template<typename T>
-typename MyList<T> :: Node** MyList<T> :: end() {
-    return &last;
+typename MyList<T>::MyIterator MyList<T>::end() {
+    return MyIterator(last->next);
 }
 
 /* Return an adress of a first element in a list */
 template<typename T>
-typename MyList<T> :: Node** MyList<T> :: begin() {
-    return &first;
+typename MyList<T>::MyIterator MyList<T>::begin() {
+    return MyIterator(first);
 }
 
-/* Add a new element into a list on the current postion. The element, that had already been on this position now is putting on next position and so on.*/
+
 template<typename T>
-void MyList<T> :: insert(MyIterator position, T newElement) {
-    Node *node = new Node();
-    *(*position.ptr)->prev = node;
-    *(*(position-1).ptr)->next = node;
-    node->data = newElement;
-    node->next = *position;
-    node->prev = *(position--);
+MyList<T>::MyIterator::MyIterator() {
+    ptr = NULL;
 }
+
+template<typename T>
+MyList<T>::MyIterator::MyIterator(Node* node) {
+    ptr = node;
+}
+
+template<typename T>
+T &MyList<T>::MyIterator::operator*() {
+    return ptr->data;
+}
+
+template<typename T>
+typename MyList<T>::MyIterator MyList<T>::MyIterator::operator++() {
+    return ptr = ptr->next;
+    return *this;
+}
+
+template<typename T>
+typename MyList<T>::MyIterator MyList<T>::MyIterator::operator--() {
+    return ptr = ptr->prev;
+    return *this;
+}
+
 
 #endif // MYLIST_H
