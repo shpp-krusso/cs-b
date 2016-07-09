@@ -4,10 +4,11 @@
 int main(int argc, char *argv[])
 {
     cout << "If you want to compress the file enter -zip" << endl <<
-            "If you want to uncompress the file enter -unzip" << endl << "Enter your choice:";
+         "If you want to uncompress the file enter -unzip" << endl << "Enter your choice:";
     string command;
     cin >> command;
-    if (command == "-zip") {
+    if (command == "-zip")
+    {
         cout << "Enter path of the origin..." << endl << "Enter the path:";
         string pathOfOrigin;
         cin >> pathOfOrigin;
@@ -16,7 +17,8 @@ int main(int argc, char *argv[])
         arch.compress(pathOfOrigin, pathOfArchive);
         cout << "Done!" << endl;
     }
-    if (command == "-unzip") {
+    if (command == "-unzip")
+    {
         cout << "Enter path of the archive .myzip ..." << endl;
         string pathOfArchive;
         cin >> pathOfArchive;
@@ -24,7 +26,9 @@ int main(int argc, char *argv[])
         Archiver arch;
         arch.uncompress(pathOfArchive, pathOfUncompressedFile);
         cout << "Done!" << endl;
-    } else {
+    }
+    else
+    {
         cout << "The command is not supported! Please, enter a right command." << endl;
     }
 
