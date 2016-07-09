@@ -8,22 +8,11 @@ template<typename T>
 class MyList {
 public:
 
-   /* Data structure, that contain a data, pointer to next elem, and pointer to previous element*/
+    /* Data structure, that contain a data, pointer to next elem, and pointer to previous element*/
     struct Node {
         T data;
         Node* next;
         Node* prev;
-        Node(T data) {
-            this->data = data;
-            next = 0;
-            prev = 0;
-        }
-
-        Node() {
-            next = 0;
-            prev = 0;
-        }
-
     };
 
     struct MyIterator {
@@ -33,11 +22,11 @@ public:
         }
 
         void operator++() {
-            ptr = &(*ptr)->next;
+            ptr = (*ptr)->next;
         }
 
         void operator--() {
-            ptr = &(*ptr)->prev;
+            ptr = (*ptr)->prev;
         }
 
         Node** operator=(Node** elem) {
@@ -52,92 +41,122 @@ public:
     Node* first; // pointer to the first element in a list
     Node* last;  //pointer to the last element in a list
     MyList();
-    T front();
-    T back();
-    void push_back(T new_element);
-    void push_front(T new_element);
+    MyList(const MyList &orig);
+    ~MyList();
+    T &front();
+    T &back();
+    void clear();
+    void push_back(const T &newElement);
+    void push_front(const T &newEelement);
     void pop_front();
     void pop_back();
-    void insert(MyIterator position, T new_element);
+    void insert(MyIterator position, T newElement);
     int size();
     bool isEmpty();
     Node** end();
     Node** begin();
 private:
-    int filled; // Number of filled elements in a list. When a list is empty, it's  value equals 0;
+    int countOfElem; // Number of filled elements in a list. When a list is empty, it's  value equals 0;
 };
 
 template<typename T>
 MyList<T> :: MyList() {
-    Node* node = new Node();
-    filled = 0;
-    first = last = node;
+    countOfElem = 0;
+    first = last = NULL;
 }
+
+template<typename T>
+MyList<T> :: MyList(const MyList<T>& origin) {
+    countOfElem = 0;
+    first = last = NULL;
+    if (!origin.isEmpty()) {
+        for (Node* node = origin.first; node != NULL; node = node->next) {
+            push_back(node->data);
+        }
+    }
+}
+
+template<typename T>
+MyList<T> :: ~MyList() {
+    clear();
+}
+
+template<typename T>
+void MyList<T> :: clear() {
+    while(countOfElem) {
+        Node* tmp = last;
+        if(last->prev != NULL) {
+            last = tmp->prev;
+        }
+        if(last->next != NULL) {
+            last->next = NULL;
+        }
+        delete tmp;
+        countOfElem--;
+    }
+}
+
 
 /* Return the number of filled elements in the list*/
 template<typename T>
 int MyList<T> :: size() {
-    return filled;
+    return countOfElem;
 }
 
 /* Add a new element into a list as the last element.*/
 template<typename T>
-void MyList<T> :: push_back(T new_element) {
-    Node* node = new Node(new_element);
-    if (filled) {
-        node->prev = last->prev;
-        node->next = last;
-        last->prev->next = node;
-        last->prev = node;
+void MyList<T> :: push_back(const T &newElem) {
+    Node* node = new Node;
+    node->data = newElem;
+    if (countOfElem) {
+        node->prev = last;
+        last->next = node;
+        last = node;
     } else {
-        first = node;
-        last->prev = node;
+        first = last = node;
     }
-    filled++;
+    countOfElem++;
 }
 
 /* Add a new element into a list as the first element. */
 template<typename T>
-void MyList<T> :: push_front(T new_element) {
-    Node* node = new Node(new_element);
-    if (filled) {
+void MyList<T> :: push_front(const T &newElement) {
+    Node* node = new Node;
+    node->data = newElement;
+    if (countOfElem) {
         node->next = first;
         first->prev = node;
         first = node;
     } else {
-        first = node;
+        first = last = node;
     }
-    filled++;
+    countOfElem++;
 }
 
 /* Delete the last element of a list. */
 template<typename T>
 void MyList<T> :: pop_back() {
-    if (filled > 1) {
-        delete  last->prev;
-        Node* tmp = last->prev;
-        tmp = tmp->prev;
+    if (countOfElem > 1) {
+        Node* tmp = last->prev->prev;
+        last->prev = tmp;
         tmp->next = last;
-        filled--;
-    }
-    else if (filled == 1) {
-        delete last->prev;
+        countOfElem--;
+    } else if (countOfElem == 1) {
+        last->prev = 0;
         first = last;
-        filled--;
+        countOfElem--;
     }
 }
 
 /* Delete the last element of a list. */
 template<typename T>
 void MyList<T> :: pop_front() {
-    if (filled > 1) {
+    if (countOfElem > 1) {
         first = first->next;
-        delete first->prev;
         first->prev = 0;
-        filled--;
-    }
-    else if (first == last) {
-        delete first;
+        countOfElem--;
+    } else if (first != last) {
+        last->prev = 0;
         first = last;
     }
 }
@@ -145,12 +164,12 @@ void MyList<T> :: pop_front() {
 /* Return true, if a list is empty. */
 template<typename T>
 bool MyList<T> :: isEmpty() {
-    return filled == 0;
+    return !countOfElem;
 }
 
 /* Return a data of a last element in a list */
 template<typename T>
-T MyList<T> :: back() {
+T &MyList<T> :: back() {
     Node* tmp = last->prev;
     if (tmp)
         return tmp->data;
@@ -158,8 +177,8 @@ T MyList<T> :: back() {
 
 /* Return a data of a first element in a list */
 template<typename T>
-T MyList<T> :: front() {
-    if (filled)
+T &MyList<T> :: front() {
+    if (countOfElem)
         return first->data;
 }
 
@@ -178,13 +197,13 @@ typename MyList<T> :: Node** MyList<T> :: begin() {
 
 /* Add a new element into a list on the current postion. The element, that had already been on this position now is putting on next position and so on.*/
 template<typename T>
-void MyList<T> :: insert(MyIterator position, T new_element) {
-       Node *node = new Node();
-       *(*position.ptr)->prev = node;
-       *(*(position-1).ptr)->next = node;
-       node->data = new_element;
-       node->next = *position;
-       node->prev = *(position--);
+void MyList<T> :: insert(MyIterator position, T newElement) {
+    Node *node = new Node();
+    *(*position.ptr)->prev = node;
+    *(*(position-1).ptr)->next = node;
+    node->data = newElement;
+    node->next = *position;
+    node->prev = *(position--);
 }
 
 #endif // MYLIST_H

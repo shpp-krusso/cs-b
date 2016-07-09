@@ -80,12 +80,17 @@ T& MyVector<T>::back() {
     if (filled) {
         return array[filled -1];
     } else {
-        return *array;
+        cerr << "Error! The back element is undefined! [The vector is empty!]" << endl;
+        exit(1);
     }
 }
 
 template <typename T>
 T& MyVector<T>::front() {
+    if (!filled) {
+        cerr << "Error! The front element is undefined! [The vector is empty!]" << endl;
+        exit(1);
+    }
     return *array;
 }
 
@@ -144,7 +149,8 @@ T &MyVector<T>::operator[](const int index) {
     if (index >= 0 && index < filled) {
         return array[index];
     } else {
-        return *array;
+       cerr << "Error! Element on the required index ["<< index << "] is undefined! [out of range]" << endl;
+       exit(1);
     }
 }
 
