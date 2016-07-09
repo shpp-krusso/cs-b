@@ -54,14 +54,14 @@ private:
 };
 
 template<typename T>
-MyList<T> :: MyList()
+MyList<T>::MyList()
 {
     countOfElem = 0;
     first = last = NULL;
 }
 
 template<typename T>
-MyList<T> :: MyList(const MyList<T>& origin)
+MyList<T>::MyList(const MyList<T>& origin)
 {
     countOfElem = 0;
     first = last = NULL;
@@ -75,14 +75,14 @@ MyList<T> :: MyList(const MyList<T>& origin)
 }
 
 template<typename T>
-MyList<T> :: ~MyList()
+MyList<T>::~MyList()
 {
     clear();
 }
 
 /* Clear a list*/
 template<typename T>
-void MyList<T> :: clear()
+void MyList<T>::clear()
 {
     while(countOfElem)
     {
@@ -103,14 +103,14 @@ void MyList<T> :: clear()
 
 /* Return the number of filled elements in the list*/
 template<typename T>
-int MyList<T> :: size()
+int MyList<T>::size()
 {
     return countOfElem;
 }
 
 /* Add a new element into a list as the last element.*/
 template<typename T>
-void MyList<T> :: push_back(const T &newElem)
+void MyList<T>::push_back(const T &newElem)
 {
     Node* node = new Node;
     node->data = newElem;
@@ -129,7 +129,7 @@ void MyList<T> :: push_back(const T &newElem)
 
 /* Add a new element into a list as the first element. */
 template<typename T>
-void MyList<T> :: push_front(const T &newElement)
+void MyList<T>::push_front(const T &newElement)
 {
     Node* node = new Node;
     node->data = newElement;
@@ -148,7 +148,7 @@ void MyList<T> :: push_front(const T &newElement)
 
 /* Delete the last element of a list. */
 template<typename T>
-void MyList<T> :: pop_back()
+void MyList<T>::pop_back()
 {
     if (countOfElem)
     {
