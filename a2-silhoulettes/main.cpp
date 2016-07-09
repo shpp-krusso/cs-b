@@ -1,12 +1,14 @@
-#include <Sihouettes_counter.h>
+#include <Silhouettes_counter.h>
 using namespace std;
 
 
 
 int main(int argc, char *argv[])
 {
-    string filePath = "/home/kocmuk/Qt-projects/a2-silhouettes/2dyadi.jpg";
-    Sihouettes_counter counter;
+    string filePath;
+    cout << "Enter the path of image:";
+    cin >> filePath;
+    Silhouettes_counter counter;
     int amount = counter.count(filePath);
     cout << "-------------result-----------" << endl;
     cout << " The amount of sihouelettes is: " << amount << endl;
