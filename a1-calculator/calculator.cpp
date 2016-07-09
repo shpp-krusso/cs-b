@@ -1,7 +1,8 @@
 #include "calculator.h"
+#include <algorithm>
 
 Calculator::Calculator() {
-    opers = {'*', '/', '-', '+', '(', ')'};
+    opers = {"*", "/", "-", "+", "(", ")"};
     functions = {"sin", "cos", "tg"};
     actionPriority["("] = 4;
     actionPriority[")"] = 0;
@@ -15,15 +16,15 @@ Calculator::Calculator() {
 }
 
 
-/* @param string expr a math expression.
+/* @param - string expr a math expression.
 * Returns a result of calculation current expression*/
 double Calculator::calculate(string &expr) {
     stack<string> mathActions;
     stack<double> digits;
     vector<string> nextActions;
-    string tmp = "";
+    string buffer = "";
     for (int i = 0; i < expr.size(); i++) {
-        getNextActions(expr, i, mathActions, digits, nextActions, tmp);
+        getNextActions(expr, i, mathActions, digits, nextActions, buffer);
         if (!nextActions.empty()) {
             estimateNextActions(nextActions, digits);
         }
@@ -38,38 +39,45 @@ double Calculator::calculate(string &expr) {
 }
 
 /* If operations of functions will have pressed out of the stack, they will have added to a vector nextActions*/
-void Calculator::getNextActions(string &expr, int currentPosition, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &tmp) {
-    if (isFunction(tmp)) {
-        addActionInOrder(tmp, mathActions, nextActions);
-        tmp = "";
+void Calculator::getNextActions(string &expr, int currentPosition, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &buffer) {
+    if (isFunction(buffer)) {
+        addActionInOrder(buffer, mathActions, nextActions);
+        buffer = "";
     }
-
+    string s = "";
+    s += expr[currentPosition];
     if (isDigit(expr[currentPosition])) {
-        if (tmp != "") {
-            if (isVariable(tmp)) {
-                digits.push(variables[tmp]);
-                tmp = "";
+        if (buffer != "") {
+            if (isVariable(buffer)) {
+                digits.push(variables[buffer]);
+                buffer = "";
             }
 
         }
-        tmp += expr[currentPosition];
+        buffer += expr[currentPosition];
         if (!isDigit(expr[currentPosition + 1]) && expr[currentPosition + 1] != '.') {
-            digits.push(stringToDouble(tmp));
-            tmp = "";
+            size_t numOfPoints = count(buffer.begin(), buffer.end(), '.');
+            if (numOfPoints > 1) {
+                size_t posOfSecPoint = buffer.find(".", buffer.find('.') + 1);
+                buffer = buffer.substr(0, posOfSecPoint);
+                cout << buffer << " buffer" << endl;
+            }
+            digits.push(stod(buffer));
+            buffer = "";
         }
-    } else if (isOper(expr[currentPosition])) {
-        if (isVariable(tmp)) {
-            digits.push(variables[tmp]);
-            tmp = "";
+    } else if (isOper(s)) {
+        if (isVariable(buffer)) {
+            digits.push(variables[buffer]);
+            buffer = "";
         }
-        if (tmp != "") {
-            tmp = "";
+        if (buffer != "") {
+            buffer = "";
         }
-        tmp += expr[currentPosition];
-        addActionInOrder(tmp, mathActions, nextActions);
-        tmp = "";
+        buffer += expr[currentPosition];
+        addActionInOrder(buffer, mathActions, nextActions);
+        buffer = "";
     } else {
-        tmp += expr[currentPosition];
+        buffer += expr[currentPosition];
     }
 }
 
@@ -120,23 +128,8 @@ bool Calculator::isFunction(string s) {
 }
 
 /* Return true if paramater is an operator*/
-bool Calculator::isOper(char c) {
-    for (int i = 0; i < opers.size(); i++) {
-        if (c == opers[i]) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/* Return true if paramater is an operator*/
-bool Calculator::isOper(string s) {
-    vector<string> operations = {"+", "-", "*", "/", "(", ")"};
-    for (int i = 0; i < operations.size(); i++) {
-        if (s == operations[i])
-            return true;
-    }
-    return false;
+bool Calculator::isOper(string &s) {
+    return (find(opers.begin(), opers.end(), s) != opers.end());
 }
 
 /* Convert a string to double.*/
@@ -164,7 +157,7 @@ void Calculator::addActionInOrder(string action, stack<string> &mathActions, vec
         mathActions.push(action);
     } else {
         if (!getActionPriority(action)) {
-            while (mathActions.top()) != "(") {
+            while (mathActions.top() != "(") {
                 string s = mathActions.top();
                 mathActions.pop();
                 nextActions.push_back(s);
