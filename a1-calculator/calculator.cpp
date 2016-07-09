@@ -18,13 +18,13 @@ Calculator::Calculator() {
 
 /* @param - string expr a math expression.
 * Returns a result of calculation current expression*/
-double Calculator::calculate(string &expr) {
+double Calculator::calculate(string expr) {
     stack<string> mathActions;
     stack<double> digits;
     vector<string> nextActions;
     string buffer = "";
     for (int i = 0; i < expr.size(); i++) {
-        getNextActions(expr, i, mathActions, digits, nextActions, buffer);
+        fillVectorNextActions(expr, i, mathActions, digits, nextActions, buffer);
         if (!nextActions.empty()) {
             estimateNextActions(nextActions, digits);
         }
@@ -39,14 +39,14 @@ double Calculator::calculate(string &expr) {
 }
 
 /* If operations of functions will have pressed out of the stack, they will have added to a vector nextActions*/
-void Calculator::getNextActions(string &expr, int currentPosition, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &buffer) {
+void Calculator::fillVectorNextActions(string &expr, int currentPosition, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &buffer) {
     if (isFunction(buffer)) {
         addActionInOrder(buffer, mathActions, nextActions);
         buffer = "";
     }
     string s = "";
     s += expr[currentPosition];
-    if (isDigit(expr[currentPosition])) {
+    if (isdigit(expr[currentPosition])) {
         if (buffer != "") {
             if (isVariable(buffer)) {
                 digits.push(variables[buffer]);
@@ -55,7 +55,7 @@ void Calculator::getNextActions(string &expr, int currentPosition, stack<string>
 
         }
         buffer += expr[currentPosition];
-        if (!isDigit(expr[currentPosition + 1]) && expr[currentPosition + 1] != '.') {
+        if (!isdigit(expr[currentPosition + 1]) && expr[currentPosition + 1] != '.') {
             size_t numOfPoints = count(buffer.begin(), buffer.end(), '.');
             if (numOfPoints > 1) {
                 size_t posOfSecPoint = buffer.find(".", buffer.find('.') + 1);
@@ -112,11 +112,6 @@ void Calculator::estimateNextActions(stack<string> &nextActions, stack<double> &
     }
 }
 
-/*
- * Return true, if parameter is a digit*/
-bool Calculator::isDigit(char c) {
-    return (c - '0') >= 0 && (c - '0') <= 9;
-}
 
 /* Return true if parameter is a function, that is define in calculator.*/
 bool Calculator::isFunction(string s) {

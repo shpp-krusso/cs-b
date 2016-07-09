@@ -13,16 +13,16 @@ class Calculator
 {
 public:
     Calculator();
-    double calculate(string &expr);
+    double calculate(string expr);
     void setVariable(string var, double value);
 
 private:
     const double PI = 3.14159265359;
     map <string, double> variables; // store names and values of variables
-    vector<char> opers;             // supported operations
+    vector<string> opers;             // supported operations
     vector<string> functions;       // suppotred functions
     map <string, int> actionPriority;
-    void getNextActions(string &expr, int currentPosiotion, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &tmp);
+    void fillVectorNextActions(string &expr, int currentPosiotion, stack<string> &mathActions, stack<double> &digits, vector <string> &nextActions, string &tmp);
     void estimateOneAction(string &action, stack<double> &digits);
     void parse(string expr);
     void estimateNextActions(vector<string> &nextActions, stack<double> &digits);
@@ -32,7 +32,7 @@ private:
     bool isDigit(char c);
     bool isFunction(string s);
     bool isOper(char c);
-    bool isOper(string s);
+    bool isOper(string &s);
     bool isVariable(string s);
     double stringToDouble(string s);
     void addActionInOrder(string s, stack <string> &mathActions, vector<string> &nextActions);
